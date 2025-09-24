@@ -2,6 +2,7 @@
 *.db
 .env
 .env.*
+node_modules/
 
 
 # SQLite database
