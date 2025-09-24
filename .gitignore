@@ -1,0 +1,12 @@
+# Node modules
+node_modules/
+
+# Base de datos local
+bcv.db
+
+# Variables de entorno
+.env
+
+# Archivos temporales
+*.log
+*.csv
