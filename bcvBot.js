@@ -7,7 +7,7 @@ async function actualizarValorBCV() {
     console.log('🟡 Iniciando scraping...');
 
 const browser = await puppeteer.launch({
-executablePath: '/opt/render/project/src/chrome-linux64/chrome',
+executablePath: '/usr/bin/chromium-browser',
   headless: true,
   args: ['--no-sandbox', '--disable-setuid-sandbox']
 });
