@@ -19,5 +19,8 @@
     "jsonwebtoken": "^9.0.2",
     "puppeteer": "^21.3.8",
     "sqlite3": "^5.1.7"
-  }
+  },
+  "engines": {
+  "node": "18.x"
+}
 }
