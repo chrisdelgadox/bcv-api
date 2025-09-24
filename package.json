@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "export": "node exportarCSV.js",
-    "install-chrome": "curl -O https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chrome-linux64.zip && unzip chrome-linux64.zip && chmod +x chrome-linux64/chrome",
-    "build": "npm run install-chrome"
+    "install-chrome": "mkdir -p /tmp/chrome && curl -o /tmp/chrome.zip https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chrome-linux64.zip && unzip /tmp/chrome.zip -d /tmp/chrome && chmod +x /tmp/chrome/chrome-linux64/chrome",
+  "build": "npm run install-chrome"
  },
   "keywords": [],
   "author": "Christopher Rodríguez D",
