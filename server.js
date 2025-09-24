@@ -40,4 +40,4 @@ app.get('/api/historial', verificarToken, async (req, res) => {
 
 app.listen(3000, () => {
   console.log('API activa en http://localhost:3000');
-});
+});"// trigger redeploy" 
