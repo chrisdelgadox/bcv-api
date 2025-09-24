@@ -2,12 +2,30 @@ const puppeteer = require('puppeteer-core');
 const { guardarValor } = require('./db');
 const dayjs = require('dayjs');
 
+const fs = require('fs');
+const path = require('path');
+const { execSync } = require('child_process');
+
+const chromePath = '/tmp/chrome/chrome-linux64/chrome';
+
+if (!fs.existsSync(chromePath)) {
+  console.log('⬇️ Descargando Chrome en tiempo de ejecución...');
+  execSync(`
+    mkdir -p /tmp/chrome &&
+    curl -o /tmp/chrome.zip https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chrome-linux64.zip &&
+    unzip /tmp/chrome.zip -d /tmp/chrome &&
+    chmod +x /tmp/chrome/chrome-linux64/chrome
+  `, { stdio: 'inherit', shell: '/bin/bash' });
+}
+
 async function actualizarValorBCV() {
   try {
     console.log('🟡 Iniciando scraping...');
 
+console.log('🔍 Verificando existencia de Chrome en:', chromePath);
+console.log('📂 Archivos en /tmp/chrome:', fs.readdirSync('/tmp/chrome'));
 const browser = await puppeteer.launch({
-executablePath: '/tmp/chrome/chrome-linux64/chrome',
+  executablePath: chromePath,
   headless: true,
   args: ['--no-sandbox', '--disable-setuid-sandbox']
 });
