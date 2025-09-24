@@ -1,5 +1,8 @@
-# Node modules
-node_modules/
+#node_modules/
+*.db
+.env
+.env.*
+
 
 # SQLite database
 database/*.sqlite
