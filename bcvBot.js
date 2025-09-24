@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const { guardarValor } = require('./db');
 const dayjs = require('dayjs');
 
@@ -7,6 +7,7 @@ async function actualizarValorBCV() {
     console.log('🟡 Iniciando scraping...');
 
     const browser = await puppeteer.launch({
+      executablePath: '/opt/render/project/src/chrome-linux64/chrome',
       headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
@@ -37,11 +38,8 @@ async function actualizarValorBCV() {
   }
 }
 
-// Exportar para uso como módulo
 module.exports = actualizarValorBCV;
 
-// Ejecutar si se llama directamente
 if (require.main === module) {
   actualizarValorBCV();
 }
-

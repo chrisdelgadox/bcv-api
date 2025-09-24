@@ -5,7 +5,9 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "export": "node exportarCSV.js"
+    "export": "node exportarCSV.js",
+    "install-chrome": "curl -O https://storage.googleapis.com/chrome-for-testing-public/114.0.5735.90/linux64/chrome-linux64.zip && unzip chrome-linux64.zip",
+    "build": "npm run install-chrome"
   },
   "keywords": [],
   "author": "Christopher Rodríguez D",
@@ -17,10 +19,10 @@
     "dotenv": "^16.3.1",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "puppeteer": "^21.3.8",
+    "puppeteer-core": "^24.22.3",
     "sqlite3": "^5.1.7"
   },
   "engines": {
-  "node": "18.x"
-}
+    "node": "18.x"
+  }
 }
