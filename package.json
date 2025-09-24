@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "export": "node exportarCSV.js",
-
+    "export": "node exportarCSV.js"
  },
   "keywords": [],
   "author": "Christopher Rodríguez D",
