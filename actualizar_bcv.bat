@@ -1,32 +1,23 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: Paso 1: Solicitar token
-echo Solicitando token JWT...
-curl -s -X POST http://localhost:3000/api/login -H "Content-Type: application/json" -d "{\"usuario\":\"admin\",\"clave\":\"bcv123\"}" > token.json
-
-:: Paso 2: Extraer token limpio del JSON
-for /f "tokens=2 delims=:," %%A in ('findstr "token" token.json') do (
-    set "TOKEN=%%~A"
+:: Paso 1: Login y obtener token
+for /f "delims=" %%A in ('curl -k -s -X POST https://bcv-api-p7g0.onrender.com/api/login -H "Content-Type: application/json" -d "{\"usuario\":\"admin\",\"clave\":\"bcv123\"}"') do (
+    set "response=%%A"
 )
 
-:: Limpiar comillas y llaves
-set "TOKEN=!TOKEN:"=!"
-set "TOKEN=!TOKEN:{=!"
-set "TOKEN=!TOKEN:}=!"
-set "TOKEN=!TOKEN: =!"
+:: Paso 2: Extraer token del JSON
+for /f "tokens=2 delims=:}" %%B in ("!response!") do (
+    set "token=%%B"
+)
 
+:: Limpieza de espacios y comillas
+set "token=!token:~1!"
+set "token=!token:"=!"
 
-:: Paso 3: Ejecutar scraping con token
-echo Ejecutando scraping con token: !TOKEN!
-curl -s -H "Authorization: Bearer !TOKEN!" http://localhost:3000/api/actualizar
+:: Paso 3: Ejecutar /api/actualizar con el token
+echo Usando token: !token!
+curl -k -s https://bcv-api-p7g0.onrender.com/api/actualizar -H "Authorization: Bearer !token!"
 
-:: Paso 4: Mostrar último valor
-echo Último valor guardado:
-curl -s http://localhost:3000/api/usd-bcv
-
-:: Limpieza
-del token.json
 endlocal
 pause
-echo Token limpio: !TOKEN!

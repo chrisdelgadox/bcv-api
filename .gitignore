@@ -1,12 +1,16 @@
 # Node modules
 node_modules/
 
-# Base de datos local
-bcv.db
+# SQLite database
+database/*.sqlite
 
-# Variables de entorno
+# Environment variables
 .env
+.env.*
 
-# Archivos temporales
+# Logs
 *.log
-*.csv
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
