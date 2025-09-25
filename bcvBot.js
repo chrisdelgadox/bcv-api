@@ -39,12 +39,54 @@ async function actualizarValorBCV() {
       throw err;
     }
 
-    const browser = await puppeteer.launch({
-      executablePath: chromePath,
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      timeout: 10000
-    });
+   const browser = await puppeteer.launch({
+  executablePath: chromePath,
+  headless: 'new', // usa el nuevo modo headless
+  args: [
+    '--no-sandbox',
+    '--disable-setuid-sandbox',
+    '--disable-dev-shm-usage',
+    '--disable-gpu',
+    '--disable-software-rasterizer',
+    '--disable-extensions',
+    '--disable-background-networking',
+    '--disable-default-apps',
+    '--disable-sync',
+    '--disable-translate',
+    '--hide-scrollbars',
+    '--metrics-recording-only',
+    '--mute-audio',
+    '--no-first-run',
+    '--safebrowsing-disable-auto-update',
+    '--disable-features=site-per-process',
+    '--disable-features=TranslateUI',
+    '--disable-breakpad',
+    '--disable-client-side-phishing-detection',
+    '--disable-component-update',
+    '--disable-domain-reliability',
+    '--disable-print-preview',
+    '--disable-prompt-on-repost',
+    '--disable-hang-monitor',
+    '--disable-popup-blocking',
+    '--disable-sync-types',
+    '--disable-web-resources',
+    '--disable-notifications',
+    '--disable-background-timer-throttling',
+    '--disable-renderer-backgrounding',
+    '--disable-device-discovery-notifications',
+    '--disable-crash-reporter',
+    '--disable-in-process-stack-traces',
+    '--disable-logging',
+    '--disable-permissions-api',
+    '--disable-remote-fonts',
+    '--disable-web-security',
+    '--disable-site-isolation-trials',
+    '--disable-blink-features=AutomationControlled'
+  ],
+  timeout: 15000
+});
+console.log('🚀 Puppeteer lanzado correctamente');
+
 
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
