@@ -23,14 +23,10 @@ async function actualizarValorBCV() {
     console.log('🟡 Iniciando scraping...');
     console.log('🔍 Verificando existencia de Chrome en:', chromePath);
 
-    // Verifica contenido del directorio
     console.log('📂 Archivos en /tmp/chrome:', fs.readdirSync('/tmp/chrome'));
     console.log('📂 Archivos en /tmp/chrome/chrome-linux64:', fs.readdirSync('/tmp/chrome/chrome-linux64'));
-
-    // Verifica permisos del binario
     console.log('🔒 Permisos de Chrome:', execSync(`ls -l ${chromePath}`).toString());
 
-    // Verifica ejecutabilidad
     try {
       const versionOutput = execSync(`${chromePath} --version`, { stdio: 'pipe' }).toString();
       console.log('✅ Chrome ejecutable:', versionOutput.trim());
@@ -39,79 +35,100 @@ async function actualizarValorBCV() {
       throw err;
     }
 
-   const browser = await puppeteer.launch({
-  executablePath: chromePath,
-  headless: 'new', // usa el nuevo modo headless
-  args: [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-dev-shm-usage',
-    '--disable-gpu',
-    '--disable-software-rasterizer',
-    '--disable-extensions',
-    '--disable-background-networking',
-    '--disable-default-apps',
-    '--disable-sync',
-    '--disable-translate',
-    '--hide-scrollbars',
-    '--metrics-recording-only',
-    '--mute-audio',
-    '--no-first-run',
-    '--safebrowsing-disable-auto-update',
-    '--disable-features=site-per-process',
-    '--disable-features=TranslateUI',
-    '--disable-breakpad',
-    '--disable-client-side-phishing-detection',
-    '--disable-component-update',
-    '--disable-domain-reliability',
-    '--disable-print-preview',
-    '--disable-prompt-on-repost',
-    '--disable-hang-monitor',
-    '--disable-popup-blocking',
-    '--disable-sync-types',
-    '--disable-web-resources',
-    '--disable-notifications',
-    '--disable-background-timer-throttling',
-    '--disable-renderer-backgrounding',
-    '--disable-device-discovery-notifications',
-    '--disable-crash-reporter',
-    '--disable-in-process-stack-traces',
-    '--disable-logging',
-    '--disable-permissions-api',
-    '--disable-remote-fonts',
-    '--disable-web-security',
-    '--disable-site-isolation-trials',
-    '--disable-blink-features=AutomationControlled'
-  ],
-  timeout: 15000
-});
-console.log('🚀 Puppeteer lanzado correctamente');
-
+    const browser = await puppeteer.launch({
+      executablePath: chromePath,
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--disable-background-networking',
+        '--disable-default-apps',
+        '--disable-sync',
+        '--disable-translate',
+        '--hide-scrollbars',
+        '--metrics-recording-only',
+        '--mute-audio',
+        '--no-first-run',
+        '--safebrowsing-disable-auto-update',
+        '--disable-features=site-per-process',
+        '--disable-features=TranslateUI',
+        '--disable-breakpad',
+        '--disable-client-side-phishing-detection',
+        '--disable-component-update',
+        '--disable-domain-reliability',
+        '--disable-print-preview',
+        '--disable-prompt-on-repost',
+        '--disable-hang-monitor',
+        '--disable-popup-blocking',
+        '--disable-sync-types',
+        '--disable-web-resources',
+        '--disable-notifications',
+        '--disable-background-timer-throttling',
+        '--disable-renderer-backgrounding',
+        '--disable-device-discovery-notifications',
+        '--disable-crash-reporter',
+        '--disable-in-process-stack-traces',
+        '--disable-logging',
+        '--disable-permissions-api',
+        '--disable-remote-fonts',
+        '--disable-web-security',
+        '--disable-site-isolation-trials',
+        '--disable-blink-features=AutomationControlled'
+      ],
+      timeout: 15000
+    });
+    console.log('🚀 Puppeteer lanzado correctamente');
+    console.log('🧪 Tipo de browser:', typeof browser);
 
     const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
+    console.log('🧪 Creando nueva página...');
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36');
+
+    await page.evaluateOnNewDocument(() => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    });
 
     console.log('🌐 Navegando a BCV...');
-    await page.goto('https://www.bcv.org.ve/', { waitUntil: 'networkidle2', timeout: 15000 });
+    await page.goto('https://www.bcv.org.ve/', { waitUntil: 'domcontentloaded', timeout: 15000 });
+    console.log('✅ Página cargada');
+
+    await page.screenshot({ path: '/tmp/bcv.png' });
+    console.log('📸 Captura de pantalla guardada');
 
     const selectorUSD = '#dolar .field-content';
     const selectorEUR = '#euro .field-content';
 
     console.log('🔎 Esperando selector USD...');
     await page.waitForSelector(selectorUSD, { timeout: 5000 });
+    console.log('✅ Selector USD encontrado');
 
     console.log('🔎 Esperando selector EUR...');
     await page.waitForSelector(selectorEUR, { timeout: 5000 });
+    console.log('✅ Selector EUR encontrado');
 
     console.log('📤 Extrayendo valores...');
-    const valorUSD = await page.$eval(selectorUSD, el => el.textContent.trim());
-    const valorEUR = await page.$eval(selectorEUR, el => el.textContent.trim());
+    let valorUSD = 'N/A';
+    let valorEUR = 'N/A';
 
-    console.log('💵 USD extraído:', valorUSD);
-    console.log('💶 EUR extraído:', valorEUR);
+    try {
+      valorUSD = await page.$eval(selectorUSD, el => el.textContent.trim());
+      console.log('💵 USD extraído:', valorUSD);
+    } catch (err) {
+      console.error('❌ No se pudo extraer USD:', err.message);
+    }
+
+    try {
+      valorEUR = await page.$eval(selectorEUR, el => el.textContent.trim());
+      console.log('💶 EUR extraído:', valorEUR);
+    } catch (err) {
+      console.error('❌ No se pudo extraer EUR:', err.message);
+    }
 
     guardarValor(valorUSD, valorEUR);
-
     console.log('✅ Valores guardados en la base de datos');
     await browser.close();
   } catch (error) {
