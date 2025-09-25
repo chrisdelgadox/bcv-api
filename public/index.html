@@ -56,7 +56,7 @@
     let chart;
 
     async function cargar(decimales = 2) {
-      const res = await fetch(`/api/valores?decimales=${decimales}`);
+const res = await fetch(`/api/usd-bcv?decimales=${decimales}`);
       const data = await res.json();
       valoresDiv.innerText = `USD: ${data.usd} | EUR: ${data.eur} | Fecha: ${data.fecha}`;
     }
