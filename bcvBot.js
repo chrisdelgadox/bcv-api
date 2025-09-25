@@ -21,14 +21,30 @@ if (!fs.existsSync(chromePath)) {
 async function actualizarValorBCV() {
   try {
     console.log('🟡 Iniciando scraping...');
+    console.log('🔍 Verificando existencia de Chrome en:', chromePath);
 
-console.log('🔍 Verificando existencia de Chrome en:', chromePath);
-console.log('📂 Archivos en /tmp/chrome:', fs.readdirSync('/tmp/chrome'));
-const browser = await puppeteer.launch({
-  executablePath: chromePath,
-  headless: true,
-  args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+    // Verifica contenido del directorio
+    console.log('📂 Archivos en /tmp/chrome:', fs.readdirSync('/tmp/chrome'));
+    console.log('📂 Archivos en /tmp/chrome/chrome-linux64:', fs.readdirSync('/tmp/chrome/chrome-linux64'));
+
+    // Verifica permisos del binario
+    console.log('🔒 Permisos de Chrome:', execSync(`ls -l ${chromePath}`).toString());
+
+    // Verifica ejecutabilidad
+    try {
+      const versionOutput = execSync(`${chromePath} --version`, { stdio: 'pipe' }).toString();
+      console.log('✅ Chrome ejecutable:', versionOutput.trim());
+    } catch (err) {
+      console.error('❌ Chrome no se puede ejecutar:', err.message);
+      throw err;
+    }
+
+    const browser = await puppeteer.launch({
+      executablePath: chromePath,
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      timeout: 10000
+    });
 
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
