@@ -37,52 +37,17 @@ async function actualizarValorBCV() {
 
     const browser = await puppeteer.launch({
       executablePath: chromePath,
-      headless: 'new',
+      headless: true,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-software-rasterizer',
-        '--disable-extensions',
-        '--disable-background-networking',
-        '--disable-default-apps',
-        '--disable-sync',
-        '--disable-translate',
-        '--hide-scrollbars',
-        '--metrics-recording-only',
-        '--mute-audio',
-        '--no-first-run',
-        '--safebrowsing-disable-auto-update',
-        '--disable-features=site-per-process',
-        '--disable-features=TranslateUI',
-        '--disable-breakpad',
-        '--disable-client-side-phishing-detection',
-        '--disable-component-update',
-        '--disable-domain-reliability',
-        '--disable-print-preview',
-        '--disable-prompt-on-repost',
-        '--disable-hang-monitor',
-        '--disable-popup-blocking',
-        '--disable-sync-types',
-        '--disable-web-resources',
-        '--disable-notifications',
-        '--disable-background-timer-throttling',
-        '--disable-renderer-backgrounding',
-        '--disable-device-discovery-notifications',
-        '--disable-crash-reporter',
-        '--disable-in-process-stack-traces',
-        '--disable-logging',
-        '--disable-permissions-api',
-        '--disable-remote-fonts',
-        '--disable-web-security',
-        '--disable-site-isolation-trials',
-        '--disable-blink-features=AutomationControlled'
+        '--disable-software-rasterizer'
       ],
-      timeout: 15000
+      timeout: 10000
     });
     console.log('🚀 Puppeteer lanzado correctamente');
-    console.log('🧪 Tipo de browser:', typeof browser);
 
     const page = await browser.newPage();
     console.log('🧪 Creando nueva página...');
@@ -142,3 +107,4 @@ module.exports = actualizarValorBCV;
 if (require.main === module) {
   actualizarValorBCV();
 }
+
