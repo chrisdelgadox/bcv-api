@@ -6,11 +6,23 @@
   <title>BCV API</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #f4f6f9;
+      --text: #1f1f1f;
+      --accent: #0078d4;
+      --eur: #00b294;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1f1f1f;
+        --text: #f4f6f9;
+      }
+    }
     body {
       margin: 0;
       font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
-      background: #f4f6f9;
-      color: #1f1f1f;
+      background: var(--bg);
+      color: var(--text);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -18,20 +30,28 @@
     }
     h1 {
       font-weight: 600;
-      color: #004578;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
     }
-    select {
+    select, button {
       margin: 1rem 0;
       padding: 0.5rem;
       font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
     }
     #valores {
       font-size: 1.2rem;
-      margin-bottom: 2rem;
+      margin-bottom: 1rem;
+    }
+    #decimales-activo {
+      font-size: 0.9rem;
+      color: #666;
     }
     canvas {
       max-width: 100%;
       height: auto;
+      margin-top: 1rem;
     }
   </style>
 </head>
@@ -44,57 +64,104 @@
     <option value="4">4</option>
     <option value="5">5</option>
     <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
   </select>
+  <div id="decimales-activo">Mostrando con 2 decimales</div>
   <div id="valores">Cargando...</div>
+  <button id="exportar">📤 Exportar histórico CSV</button>
   <canvas id="grafico"></canvas>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     const decimalesSelect = document.getElementById('decimales');
     const valoresDiv = document.getElementById('valores');
+    const decimalesActivo = document.getElementById('decimales-activo');
+    const exportarBtn = document.getElementById('exportar');
     const ctx = document.getElementById('grafico').getContext('2d');
     let chart;
 
+    function formatear(valor, decimales) {
+      const num = typeof valor === 'string' ? parseFloat(valor.replace(',', '.')) : parseFloat(valor);
+      return isNaN(num) ? 'N/A' : num.toFixed(decimales);
+    }
+
     async function cargar(decimales = 2) {
-const res = await fetch(`/api/usd-bcv?decimales=${decimales}`);
-      const data = await res.json();
-      valoresDiv.innerText = `USD: ${data.usd} | EUR: ${data.eur} | Fecha: ${data.fecha}`;
+      try {
+        const res = await fetch(`/api/usd-bcv?decimales=${decimales}`);
+        const data = await res.json();
+        const usd = formatear(data.usd, decimales);
+        const eur = formatear(data.eur, decimales);
+        const fecha = data.fecha || 'Sin fecha';
+
+        if (usd === 'N/A' || eur === 'N/A') {
+          valoresDiv.innerText = '⚠️ Datos no disponibles';
+        } else {
+          valoresDiv.innerText = `USD: ${usd} | EUR: ${eur} | Fecha: ${fecha}`;
+        }
+        decimalesActivo.innerText = `Mostrando con ${decimales} decimales`;
+      } catch (err) {
+        valoresDiv.innerText = '⚠️ Error al cargar datos';
+      }
     }
 
     async function cargarGrafico(decimales = 2) {
-      const res = await fetch(`/api/historico?decimales=${decimales}`);
-      const data = await res.json();
-      const labels = data.map(d => d.fecha);
-      const usd = data.map(d => d.usd);
-      const eur = data.map(d => d.eur);
+      try {
+        const res = await fetch(`/api/historial?decimales=${decimales}`);
+        const data = await res.json();
+        const labels = data.map(d => d.fecha);
+        const usd = data.map(d => formatear(d.usd, decimales));
+        const eur = data.map(d => formatear(d.eur, decimales));
 
-      if (chart) chart.destroy();
-      chart = new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [
-            { label: 'USD', data: usd, borderColor: '#0078d4', fill: false },
-            { label: 'EUR', data: eur, borderColor: '#00b294', fill: false }
-          ]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            legend: { position: 'top' }
+        if (chart) chart.destroy();
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label: 'USD', data: usd, borderColor: 'var(--accent)', fill: false },
+              { label: 'EUR', data: eur, borderColor: 'var(--eur)', fill: false }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: { position: 'top' }
+            }
           }
-        }
-      });
+        });
+      } catch (err) {
+        console.error('Error al cargar gráfico:', err.message);
+      }
+    }
+
+    function exportarCSV() {
+      fetch('/api/historial?decimales=8')
+        .then(res => res.json())
+        .then(data => {
+          const encabezado = 'Fecha,USD,EUR\n';
+          const filas = data.map(d => `${d.fecha},${formatear(d.usd, 8)},${formatear(d.eur, 8)}`).join('\n');
+          const blob = new Blob([encabezado + filas], { type: 'text/csv' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'historial_bcv.csv';
+          a.click();
+          URL.revokeObjectURL(url);
+        });
     }
 
     decimalesSelect.onchange = e => {
-      const decimales = e.target.value;
+      const decimales = parseInt(e.target.value);
       cargar(decimales);
       cargarGrafico(decimales);
     };
+
+    exportarBtn.onclick = exportarCSV;
 
     cargar();
     cargarGrafico();
   </script>
 </body>
 </html>
+
