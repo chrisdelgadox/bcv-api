@@ -1,0 +1,57 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "BCV API",
+    "version": "2.0.0",
+    "description": "Microservicio para consultar valores USD/EUR del BCV con scraping, seguridad JWT y frontend visual"
+  },
+  "paths": {
+    "/api/scrape": {
+      "get": {
+        "summary": "Ejecuta scraping manual del BCV",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Scraping ejecutado correctamente" },
+          "401": { "description": "Token requerido" },
+          "403": { "description": "Token inválido" }
+        }
+      }
+    },
+    "/api/valores": {
+      "get": {
+        "summary": "Consulta el último valor del BCV",
+        "parameters": [{
+          "name": "decimales",
+          "in": "query",
+          "description": "Número de decimales (2 a 6)",
+          "schema": { "type": "integer", "minimum": 2, "maximum": 6 }
+        }],
+        "responses": {
+          "200": { "description": "Valores actuales del BCV" }
+        }
+      }
+    },
+    "/api/historico": {
+      "get": {
+        "summary": "Consulta el histórico completo de valores",
+        "parameters": [{
+          "name": "decimales",
+          "in": "query",
+          "description": "Número de decimales (2 a 6)",
+          "schema": { "type": "integer", "minimum": 2, "maximum": 6 }
+        }],
+        "responses": {
+          "200": { "description": "Histórico de valores" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}

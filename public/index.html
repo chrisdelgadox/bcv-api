@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BCV API</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=Segoe+UI:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+      background: #f4f6f9;
+      color: #1f1f1f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    h1 {
+      font-weight: 600;
+      color: #004578;
+    }
+    select {
+      margin: 1rem 0;
+      padding: 0.5rem;
+      font-size: 1rem;
+    }
+    #valores {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    canvas {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>Consulta BCV</h1>
+  <label for="decimales">Decimales:</label>
+  <select id="decimales">
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+  </select>
+  <div id="valores">Cargando...</div>
+  <canvas id="grafico"></canvas>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    const decimalesSelect = document.getElementById('decimales');
+    const valoresDiv = document.getElementById('valores');
+    const ctx = document.getElementById('grafico').getContext('2d');
+    let chart;
+
+    async function cargar(decimales = 2) {
+      const res = await fetch(`/api/valores?decimales=${decimales}`);
+      const data = await res.json();
+      valoresDiv.innerText = `USD: ${data.usd} | EUR: ${data.eur} | Fecha: ${data.fecha}`;
+    }
+
+    async function cargarGrafico(decimales = 2) {
+      const res = await fetch(`/api/historico?decimales=${decimales}`);
+      const data = await res.json();
+      const labels = data.map(d => d.fecha);
+      const usd = data.map(d => d.usd);
+      const eur = data.map(d => d.eur);
+
+      if (chart) chart.destroy();
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            { label: 'USD', data: usd, borderColor: '#0078d4', fill: false },
+            { label: 'EUR', data: eur, borderColor: '#00b294', fill: false }
+          ]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'top' }
+          }
+        }
+      });
+    }
+
+    decimalesSelect.onchange = e => {
+      const decimales = e.target.value;
+      cargar(decimales);
+      cargarGrafico(decimales);
+    };
+
+    cargar();
+    cargarGrafico();
+  </script>
+</body>
+</html>
