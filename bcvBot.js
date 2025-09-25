@@ -72,21 +72,34 @@ async function actualizarValorBCV() {
     let valorEUR = 'N/A';
 
     try {
-      valorUSD = await page.$eval(selectorUSD, el => el.textContent.trim());
-      console.log('💵 USD extraído:', valorUSD);
+      valorUSD = await page.$eval(selectorUSD, el =>
+        el.textContent.replace(/[^\d.,]/g, '').trim()
+      );
+      console.log('💵 USD limpio:', valorUSD);
     } catch (err) {
       console.error('❌ No se pudo extraer USD:', err.message);
     }
 
     try {
-      valorEUR = await page.$eval(selectorEUR, el => el.textContent.trim());
-      console.log('💶 EUR extraído:', valorEUR);
+      valorEUR = await page.$eval(selectorEUR, el =>
+        el.textContent.replace(/[^\d.,]/g, '').trim()
+      );
+      console.log('💶 EUR limpio:', valorEUR);
     } catch (err) {
       console.error('❌ No se pudo extraer EUR:', err.message);
     }
 
-    guardarValor(valorUSD, valorEUR);
-    console.log('✅ Valores guardados en la base de datos');
+    // Validación final
+    const usdValido = valorUSD && !isNaN(parseFloat(valorUSD.replace(',', '.')));
+    const eurValido = valorEUR && !isNaN(parseFloat(valorEUR.replace(',', '.')));
+
+    if (usdValido && eurValido) {
+      guardarValor(valorUSD, valorEUR);
+      console.log('✅ Valores guardados en la base de datos');
+    } else {
+      console.warn('⚠️ Valores inválidos detectados, no se guardarán');
+    }
+
     await browser.close();
   } catch (error) {
     console.error('❌ Error en scraping:', error.message);
