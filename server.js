@@ -25,13 +25,12 @@ app.post('/api/login', (req, res) => {
 
 // 📈 Último valor con decimales
 app.get('/api/usd-bcv', async (req, res) => {
-  const decimales = parseInt(req.query.decimales) || 2;
   const valor = await obtenerUltimoValor();
   if (!valor) return res.status(404).json({ error: 'Sin datos disponibles' });
 
   res.json({
-    usd: parseFloat(valor.usd).toFixed(decimales),
-    eur: parseFloat(valor.eur).toFixed(decimales),
+    usd: valor.usd, // conserva el valor original con coma
+    eur: valor.eur,
     fecha: valor.fecha
   });
 });
