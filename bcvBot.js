@@ -48,14 +48,20 @@ async function actualizarValorBCV() {
 
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64)');
-    await page.goto('https://www.bcv.org.ve/', { waitUntil: 'networkidle2' });
+
+    console.log('🌐 Navegando a BCV...');
+    await page.goto('https://www.bcv.org.ve/', { waitUntil: 'networkidle2', timeout: 15000 });
 
     const selectorUSD = '#dolar .field-content';
     const selectorEUR = '#euro .field-content';
 
+    console.log('🔎 Esperando selector USD...');
     await page.waitForSelector(selectorUSD, { timeout: 5000 });
+
+    console.log('🔎 Esperando selector EUR...');
     await page.waitForSelector(selectorEUR, { timeout: 5000 });
 
+    console.log('📤 Extrayendo valores...');
     const valorUSD = await page.$eval(selectorUSD, el => el.textContent.trim());
     const valorEUR = await page.$eval(selectorEUR, el => el.textContent.trim());
 
