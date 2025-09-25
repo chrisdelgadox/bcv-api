@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer-core');
+const { chromium } = require('playwright-core');
 const { guardarValor } = require('./db');
 const dayjs = require('dayjs');
 
@@ -20,7 +20,7 @@ if (!fs.existsSync(chromePath)) {
 
 async function actualizarValorBCV() {
   try {
-    console.log('🟡 Iniciando scraping...');
+    console.log('🟡 Iniciando scraping con Playwright...');
     console.log('🔍 Verificando existencia de Chrome en:', chromePath);
 
     console.log('📂 Archivos en /tmp/chrome:', fs.readdirSync('/tmp/chrome'));
@@ -35,27 +35,19 @@ async function actualizarValorBCV() {
       throw err;
     }
 
-    const browser = await puppeteer.launch({
+    const browser = await chromium.launch({
       executablePath: chromePath,
       headless: true,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--disable-software-rasterizer'
-      ],
-      timeout: 10000
+      args: ['--no-sandbox']
     });
-    console.log('🚀 Puppeteer lanzado correctamente');
+    console.log('🚀 Playwright lanzó Chromium correctamente');
 
-    const page = await browser.newPage();
-    console.log('🧪 Creando nueva página...');
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36');
-
-    await page.evaluateOnNewDocument(() => {
-      Object.defineProperty(navigator, 'webdriver', { get: () => false });
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/114.0.0.0 Safari/537.36'
     });
+
+    const page = await context.newPage();
+    console.log('🧪 Página creada');
 
     console.log('🌐 Navegando a BCV...');
     await page.goto('https://www.bcv.org.ve/', { waitUntil: 'domcontentloaded', timeout: 15000 });
@@ -107,4 +99,3 @@ module.exports = actualizarValorBCV;
 if (require.main === module) {
   actualizarValorBCV();
 }
-
